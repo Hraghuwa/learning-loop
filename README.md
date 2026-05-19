@@ -1,3 +1,35 @@
+# Learning Loop
+
+Learning Loop is a reasoning-first CAT preparation platform. Instead of only showing correctness, it captures and diagnoses student thinking patterns with AI.
+
+## Stack
+- Next.js 14 + App Router + TypeScript
+- Tailwind CSS + custom design tokens
+- Supabase (Postgres + Auth)
+- Claude API (`claude-sonnet-4-20250514`) for reasoning analysis
+- Razorpay scaffolding for upgrades
+- PostHog event instrumentation hooks
+
+## Local setup
+1. Install dependencies: `npm install`
+2. Configure environment variables from `.env.example`
+3. Run Supabase migration in your project (`supabase db push`)
+4. Seed question bank: `npm run seed`
+5. Start app: `npm run dev`
+
+## Included routes
+- Auth: `/login`, `/signup`
+- App: `/dashboard`, `/practice`, `/practice/[id]`, `/profile`, `/history`, `/institute`
+- Pricing: `/pricing`
+- APIs: `/api/analyze`, `/api/questions`, `/api/sessions`, `/api/profile`, `/api/payments/razorpay/order`
+
+## Deployment checklist
+1. Deploy Next.js app on Vercel
+2. Configure all env vars in Vercel
+3. Run Supabase migrations and seed script
+4. Ensure RLS policies are enabled
+5. Configure Razorpay webhook (phase 2 hardening)
+6. Configure PostHog project key
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
 ## Getting Started

@@ -1,0 +1,4 @@
+[
+  { "problem": "A train covers 360 km in 4 hours. What is its speed in km/h?", "expected": "90", "domain": "arithmetic" },
+  { "problem": "If 8 workers build a wall in 10 days, how many days for 16 workers at the same rate?", "expected": "5", "domain": "arithmetic" }
+]

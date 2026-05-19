@@ -1,0 +1,20 @@
+{"id":"A1","domain":"arithmetic","subDomain":"time-speed-distance","problem":"A train covers 360 km in 4 hours. What is its speed in km/h?","answer":"90","source":"authored-cat-style"}
+{"id":"A2","domain":"arithmetic","subDomain":"time-and-work","problem":"If 8 workers build a wall in 10 days, how many days will 16 workers take at the same rate?","answer":"5","source":"authored-cat-style"}
+{"id":"A3","domain":"arithmetic","subDomain":"percentage","problem":"If A's salary is 25% more than B's, by what percent is B's salary less than A's?","answer":"20","source":"authored-cat-style"}
+{"id":"A4","domain":"arithmetic","subDomain":"profit-and-loss","problem":"An article is bought for Rs 400 and sold for Rs 500. What is the profit percent?","answer":"25","source":"authored-cat-style"}
+{"id":"A5","domain":"arithmetic","subDomain":"simple-interest","problem":"Find the simple interest on Rs 1000 at 10% per annum for 3 years.","answer":"300","source":"authored-cat-style"}
+{"id":"A6","domain":"arithmetic","subDomain":"compound-interest","problem":"Find the compound interest on Rs 1000 at 10% per annum for 2 years, compounded annually.","answer":"210","source":"authored-cat-style"}
+{"id":"A7","domain":"arithmetic","subDomain":"ratio-proportion","problem":"Rs 600 is divided among three people in the ratio 2:3:5. What is the largest share in rupees?","answer":"300","source":"authored-cat-style"}
+{"id":"A8","domain":"arithmetic","subDomain":"averages","problem":"What is the average of the first 10 natural numbers?","answer":"5.5","source":"authored-cat-style"}
+{"id":"A9","domain":"arithmetic","subDomain":"boats-and-streams","problem":"A boat's speed in still water is 10 km/h and the stream speed is 2 km/h. What is the downstream speed in km/h?","answer":"12","source":"authored-cat-style"}
+{"id":"A10","domain":"arithmetic","subDomain":"ages","problem":"A father is three times as old as his son. In 12 years he will be twice as old as his son. How old is the son now?","answer":"12","source":"authored-cat-style"}
+{"id":"A11","domain":"arithmetic","subDomain":"hcf-lcm","problem":"What is the HCF of 36 and 48?","answer":"12","source":"authored-cat-style"}
+{"id":"A12","domain":"arithmetic","subDomain":"hcf-lcm","problem":"What is the LCM of 4, 6 and 8?","answer":"24","source":"authored-cat-style"}
+{"id":"A13","domain":"arithmetic","subDomain":"mensuration","problem":"What is the area of a circle of radius 7 cm? Use pi = 22/7. Give the value in square cm.","answer":"154","source":"authored-cat-style"}
+{"id":"A14","domain":"arithmetic","subDomain":"successive-percentage","problem":"A number is increased by 10% and then decreased by 10%. If the original number is 100, what is the final value?","answer":"99","source":"authored-cat-style"}
+{"id":"A15","domain":"arithmetic","subDomain":"series","problem":"What is the sum of the first 20 natural numbers?","answer":"210","source":"authored-cat-style"}
+{"id":"L1","domain":"logic","subDomain":"blood-relations","problem":"Pointing to a photograph, a man says, 'She is the daughter of my grandfather's only son.' How is the woman related to the man?","answer":"sister","source":"authored-cat-style"}
+{"id":"L2","domain":"logic","subDomain":"odd-one-out","problem":"Find the odd one out: Apple, Mango, Carrot, Banana.","answer":"Carrot","source":"authored-cat-style"}
+{"id":"L3","domain":"logic","subDomain":"coding-decoding","problem":"In a certain code, CAT is written as DBU (each letter shifted by +1). How is DOG written in that code?","answer":"EPH","source":"authored-cat-style"}
+{"id":"L4","domain":"logic","subDomain":"number-series","problem":"Find the next number in the series: 2, 6, 12, 20, 30, ?","answer":"42","source":"authored-cat-style"}
+{"id":"V1","domain":"verbal","subDomain":"synonyms","problem":"Choose the word closest in meaning to 'abundant': scarce, plentiful, hidden, fragile.","answer":"plentiful","source":"authored-cat-style"}

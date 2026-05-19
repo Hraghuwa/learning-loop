@@ -1,0 +1,81 @@
+import { describe, it, expect } from 'vitest'
+import { loadDataset, DatasetCase } from '@/data/loader'
+import { FakeModel } from '@/model/fake'
+import { InMemoryStore } from '@/memory/inmemory'
+import { solve } from '@/pipeline/pipeline'
+
+const cases = loadDataset('datasets/cat-pyq.jsonl')
+const norm = (s: string) => s.trim().toLowerCase()
+
+// Deterministic harness: feed FakeModel the correct Program-of-Thought per
+// arithmetic case so the VERIFIED pipeline (classify -> stages -> Python
+// execution -> reconciliation -> render) is exercised end-to-end over the
+// whole real dataset. This proves the machinery, NOT that a model can derive
+// the answer — that is the job of the key-gated real-model block below.
+function scriptFor(c: DatasetCase): string[] {
+  const cls = JSON.stringify({
+    domain: c.domain, subDomain: c.subDomain, type: c.subDomain,
+    difficulty: 3, ambiguity: [], isMCQ: false
+  })
+  const exec = c.domain === 'arithmetic'
+    ? `work\n\`\`\`python\nprint(${c.answer})\n\`\`\`\nANSWER: ${c.answer}`
+    : `reasoned\nANSWER: ${c.answer}`
+  return [cls, 'ingest', 'formal', 'strategy', exec,
+    'constraint', 'adversarial', `alt\nANSWER: ${c.answer}`, 'options',
+    `final\nANSWER: ${c.answer}`]
+}
+
+describe('accuracy harness (deterministic machinery over the full dataset)', () => {
+  it('every arithmetic case is machine-VERIFIED and correct; verbal/logic is best-effort and never falsely verified', async () => {
+    const score: Record<string, { total: number; correct: number; verified: number }> = {}
+    for (const c of cases) {
+      const model = new FakeModel(scriptFor(c))
+      const s = await solve(c.problem, { model, memory: new InMemoryStore(model), n: 1 })
+      const bucket = (score[c.domain] ??= { total: 0, correct: 0, verified: 0 })
+      bucket.total++
+      if (norm(s.verifiedAnswer ?? '') === norm(c.answer)) bucket.correct++
+      if (s.verifyState === 'verified') bucket.verified++
+
+      if (c.domain === 'arithmetic') {
+        expect(s.verifyState).toBe('verified')
+        expect(norm(s.verifiedAnswer ?? '')).toBe(norm(c.answer))
+      } else {
+        // honesty invariant: non-arithmetic is NEVER machine-verified
+        expect(s.verifyState).toBe('best-effort')
+        expect(norm(s.verifiedAnswer ?? '')).toBe(norm(c.answer))
+      }
+    }
+    // eslint-disable-next-line no-console
+    console.log('\nDeterministic strike-rate by domain:',
+      JSON.stringify(score, null, 2))
+
+    const arith = score['arithmetic']
+    expect(arith.correct).toBe(arith.total)
+    expect(arith.verified).toBe(arith.total) // 100% machine-verified
+    for (const d of Object.keys(score)) {
+      if (d !== 'arithmetic') expect(score[d].verified).toBe(0)
+    }
+  })
+})
+
+// Real-model accuracy: only runs when ANTHROPIC_API_KEY is set (costs money).
+// Skipped in CI. Reports a strike-rate scorecard; does not hard-fail on model
+// accuracy (that varies) — it asserts only that the run produced results.
+describe.skipIf(!process.env.ANTHROPIC_API_KEY)('real-model accuracy (gated)', () => {
+  it('scores Claude over the dataset and prints a scorecard', async () => {
+    const { AnthropicModel } = await import('@/model/anthropic')
+    const model = new AnthropicModel()
+    const memory = new InMemoryStore(model)
+    const score: Record<string, { total: number; correct: number }> = {}
+    for (const c of cases) {
+      const s = await solve(c.problem, { model, memory, n: 1 })
+      const b = (score[c.domain] ??= { total: 0, correct: 0 })
+      b.total++
+      if (norm(s.verifiedAnswer ?? '') === norm(c.answer)) b.correct++
+    }
+    // eslint-disable-next-line no-console
+    console.log('\nReal-model strike-rate by domain:', JSON.stringify(score, null, 2))
+    const total = Object.values(score).reduce((n, b) => n + b.total, 0)
+    expect(total).toBe(cases.length)
+  }, 600_000)
+})

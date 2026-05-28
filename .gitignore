@@ -52,5 +52,9 @@ __pycache__/
 .flan-t5-answer
 .st-retriever
 
+# Phase 5 ingested corpora — regeneratable via scripts/ingest_*.py
+datasets/*-corpus.jsonl
+datasets/*-corpus.stats.json
+
 # supabase local state
 supabase/.temp

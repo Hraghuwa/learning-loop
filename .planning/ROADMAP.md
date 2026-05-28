@@ -60,7 +60,7 @@ generates on-style practice problems, and adapts to the learner.
 **Plans**: 4 (small, atomic)
 
 - [x] 05-01: Inventory + license audit of candidate open datasets (HF list + license check)
-- [ ] 05-02: Ingest math corpora (OpenMathInstruct-2, MATH, MMLU-stem, GSM8K already in)
+- [x] 05-02: Ingest math corpora (OpenMathInstruct-2, MATH, MMLU-stem, GSM8K already in)
 - [ ] 05-03: Ingest verbal/logical corpora (MMLU-humanities, LSAT-AR, BoolQ, ARC)
 - [ ] 05-04: Ingest CC-licensed long-form (OpenStax chapters, NPTEL transcript subset)
 
@@ -128,7 +128,7 @@ generates on-style practice problems, and adapts to the learner.
 | 2. Bigger dataset | v1.0 | 2/2 | Complete | 2026-05-28 |
 | 3. Retrieval + gen | v1.0 | 2/2 | Complete | 2026-05-28 |
 | 4. Backend + frontend | v1.0 | 3/3 | Complete | 2026-05-28 |
-| 5. Open ed datasets | v1.1 | 1/4 | In progress | — |
+| 5. Open ed datasets | v1.1 | 2/4 | In progress | — |
 | 6. Public exam corpus | v1.1 | 0/3 | Not started | — |
 | 7. Hygiene + storage | v1.1 | 0/2 | Not started | — |
 | 8. RAG + citations | v1.1 | 0/3 | Not started | — |

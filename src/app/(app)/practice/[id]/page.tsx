@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import { QuestionSession } from "@/components/practice/question-session";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
@@ -5,13 +6,14 @@ import { createServerSupabaseClient } from "@/lib/supabase/server";
 export default async function PracticeQuestionPage({
   params,
 }: {
-  params: { id: string };
+  params: Promise<{ id: string }> | { id: string };
 }) {
   const supabase = await createServerSupabaseClient();
+  const { id } = await params;
   const { data: question } = await supabase
     .from("questions")
     .select("*")
-    .eq("id", params.id)
+    .eq("id", id)
     .single();
   const row = question as {
     id: string;
@@ -26,5 +28,15 @@ export default async function PracticeQuestionPage({
   } | null;
 
   if (!row) notFound();
-  return <QuestionSession question={row} />;
+  return (
+    <div className="space-y-4">
+      <Link
+        href="/practice"
+        className="font-mono text-xs text-[var(--muted)] hover:text-[var(--gold)]"
+      >
+        ← Back to practice
+      </Link>
+      <QuestionSession question={row} />
+    </div>
+  );
 }

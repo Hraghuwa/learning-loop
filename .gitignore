@@ -39,3 +39,18 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# python
+__pycache__/
+*.pyc
+
+# claude code local config
+.claude
+
+# ML model artifacts (re-trainable via scripts/)
+.autogluon-*
+.flan-t5-answer
+.st-retriever
+
+# supabase local state
+supabase/.temp

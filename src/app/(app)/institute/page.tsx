@@ -22,7 +22,7 @@ export default function InstituteDashboard() {
   const fetchBatches = async () => {
     const res = await fetch("/api/institute/classes");
     const data = await res.json();
-    setBatches(data);
+    setBatches(Array.isArray(data) ? data : []);
     setLoading(false);
   };
 

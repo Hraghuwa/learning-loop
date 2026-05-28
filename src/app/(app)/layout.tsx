@@ -14,12 +14,18 @@ export default async function AppLayout({
 
   if (!user) redirect("/login");
 
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("name, streak_count, xp")
-    .eq("id", user.id)
-    .single();
-  const profileRow = profile as { name?: string; streak_count?: number; xp?: number } | null;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = supabase as any;
+  const today = new Date().toISOString().split("T")[0];
+
+  const [{ data: profile }, { data: usage }] = await Promise.all([
+    db.from("profiles").select("name, streak_count, xp, plan").eq("id", user.id).single(),
+    db.from("daily_usage").select("analyses_count").eq("user_id", user.id).eq("usage_date", today).maybeSingle(),
+  ]);
+
+  const profileRow =
+    (profile as { name?: string; streak_count?: number; xp?: number; plan?: string } | null) ??
+    null;
 
   return (
     <div className="min-h-screen bg-[var(--paper)]">
@@ -27,8 +33,10 @@ export default async function AppLayout({
         userName={profileRow?.name || user.email || "Learner"}
         streak={profileRow?.streak_count ?? 0}
         xp={profileRow?.xp ?? 0}
+        plan={profileRow?.plan ?? "free"}
+        todayUsage={Number(usage?.analyses_count ?? 0)}
       />
-      <main className="ml-[220px] min-h-screen p-8">{children}</main>
+      <main className="md:ml-[220px] min-h-screen p-4 pt-20 md:pt-8 md:p-8">{children}</main>
     </div>
   );
 }

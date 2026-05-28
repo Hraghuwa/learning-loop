@@ -1,7 +1,7 @@
 import crypto from "crypto";
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { analyzeReasoning } from "@/lib/ai/claude";
+import { analyzeReasoning, type Diagnosis } from "@/lib/ai/claude";
 import { supabaseAdmin } from "@/lib/supabase/admin";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 
@@ -18,7 +18,7 @@ const schema = z.object({
   reasoning: z.string(),
 });
 
-const fallback = {
+const fallback: Diagnosis = {
   errorType: "Assumption Error",
   diagnosis:
     "You attempted a valid path but the logic chain needs one more verification step.",
@@ -27,6 +27,8 @@ const fallback = {
   reasoningScore: 5,
   patternAlert: "Tendency to lock in an answer before constraint validation.",
   nextPracticeTopic: "Constraint-based elimination",
+  confidence: 0.3,
+  cognitiveMoves: [],
 };
 
 export async function POST(req: Request) {
@@ -39,7 +41,6 @@ export async function POST(req: Request) {
     const db = supabaseAdmin as any;
     const body = schema.parse(await req.json());
 
-    // Plan + usage gate.
     const { data: profileRow } = await db
       .from("profiles")
       .select("plan")
@@ -68,31 +69,33 @@ export async function POST(req: Request) {
       }
     }
 
-    // Cache lookup.
     const cacheKey = crypto.createHash("sha256").update(JSON.stringify(body)).digest("hex");
     const { data: cached } = await db
       .from("analysis_cache")
       .select("response_json")
       .eq("cache_key", cacheKey)
       .single();
-    const cachedRow = cached as { response_json?: typeof fallback } | null;
+    const cachedRow = cached as { response_json?: Diagnosis } | null;
 
-    let parsed: typeof fallback;
+    let parsed: Diagnosis;
     if (cachedRow?.response_json) {
       parsed = cachedRow.response_json;
     } else {
-      const raw = await analyzeReasoning(body);
-      const clean = raw.replace(/```json|```/g, "").trim();
+      // Enrich with the canonical explanation so the local engine gets concept context.
+      const { data: qRow } = await db
+        .from("questions")
+        .select("explanation")
+        .eq("id", body.questionId)
+        .single();
       try {
-        parsed = JSON.parse(clean);
-      } catch {
+        parsed = await analyzeReasoning({ ...body, explanation: qRow?.explanation ?? null });
+      } catch (e) {
+        console.error("analyzeReasoning failed", e);
         parsed = { ...fallback };
       }
-      parsed.reasoningScore = Math.max(0, Math.min(10, Number(parsed.reasoningScore || 5)));
       await db.from("analysis_cache").upsert({ cache_key: cacheKey, response_json: parsed });
     }
 
-    // Increment usage AFTER a successful analysis (cached or not still costs a quota slot).
     if (plan === "free") {
       await db.rpc("increment_daily_analyses", { uid: user.id });
     }

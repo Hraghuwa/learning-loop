@@ -1,16 +1,22 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { notFound } from "next/navigation";
 import { User, TrendingUp, AlertCircle } from "lucide-react";
 
-export default async function InstituteClassPage({ params }: { params: { id: string } }) {
+export default async function InstituteClassPage({
+  params,
+}: {
+  params: Promise<{ id: string }> | { id: string };
+}) {
   const supabase = await createServerSupabaseClient();
   const { data: { user } } = await supabase.auth.getUser();
+  const { id } = await params;
 
   // 1. Fetch class details
   const { data: classData, error: classError } = await (supabase
     .from("institute_classes")
     .select("*")
-    .eq("id", params.id)
+    .eq("id", id)
     .eq("teacher_id", user!.id) as any)
     .single();
 
@@ -19,18 +25,20 @@ export default async function InstituteClassPage({ params }: { params: { id: str
   const classItem = classData as { institute_name: string; batch_name: string; join_code: string };
 
   // 2. Fetch enrolled students and their profiles
-  const { data: enrollments, error: enrollError } = await (supabase
+  const { data: enrollments } = await (supabase
     .from("class_enrollments")
     .select("student_id, profiles(name, xp, streak_count), cognitive_profiles(*)")
-    .eq("class_id", params.id) as any);
+    .eq("class_id", id) as any);
 
   const students = enrollments ?? [];
 
   // Calculate averages
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const avgAccuracy =
-    students.reduce((acc, s: any) => acc + (s.cognitive_profiles?.accuracy_score || 0), 0) / (students.length || 1);
+    students.reduce((acc: number, s: any) => acc + (s.cognitive_profiles?.accuracy_score || 0), 0) / (students.length || 1);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const avgReasoning =
-    students.reduce((acc, s: any) => acc + (s.cognitive_profiles?.reasoning_score || 0), 0) / (students.length || 1);
+    students.reduce((acc: number, s: any) => acc + (s.cognitive_profiles?.reasoning_score || 0), 0) / (students.length || 1);
 
   return (
     <div className="space-y-8">

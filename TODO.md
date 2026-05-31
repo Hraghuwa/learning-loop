@@ -1,0 +1,8 @@
+- [x] Create branch `blackboxai/repo-docs`.
+- [x] Audit current README + key project modules for accurate documentation coverage.
+- [x] Rewrite `README.md` with detailed architecture, features, APIs, ML backend, scripts, setup, testing, and deployment sections.
+- [x] Diagnose failing test suite (`npm run test`) and identify root cause in logic verifier dependency path.
+- [x] Fix `src/verify/sidecar.py` to ensure z3 availability before logic verification.
+- [x] Re-run full test suite (`npm run test`) and confirm all tests pass.
+- [ ] Commit documentation + bugfix updates.
+- [ ] Push branch to GitHub.

@@ -1,4 +1,4 @@
-import sys, json, io, contextlib
+import sys, json, io, contextlib, subprocess
 
 def run_arithmetic(code: str):
     buf = io.StringIO()
@@ -16,7 +16,29 @@ def run_arithmetic(code: str):
     except Exception as e:
         return {"ok": False, "error": f"{type(e).__name__}: {e}"}
 
+def _ensure_z3():
+    try:
+        from z3 import Solver, parse_smt2_string  # noqa: F401
+        return True, None
+    except Exception:
+        pass
+    try:
+        subprocess.run(
+            [sys.executable, "-m", "pip", "install", "z3-solver"],
+            check=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+        )
+        from z3 import Solver, parse_smt2_string  # noqa: F401
+        return True, None
+    except Exception as e:
+        return False, f"{type(e).__name__}: {e}"
+
 def run_logic(smt: str):
+    ok, err = _ensure_z3()
+    if not ok:
+        return {"status": "error", "error": f"z3 unavailable: {err}"}
     try:
         from z3 import Solver, parse_smt2_string
         s = Solver()

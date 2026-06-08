@@ -226,10 +226,15 @@ Representative scripts:
   - `scripts/build_retriever.py`
   - `scripts/build_production_retriever.py`
 
-- Training
+- Training (generation model) — **free by default**
+  - `scripts/train_flan_t5.py` — **free local training on your Mac's GPU (Metal/MPS)**;
+    trains chain-of-thought solutions on a curated subset of the full corpus. Default path.
+  - `scripts/cloud/train_flan_t5_kaggle.py` — **free GPU scale-up** on Kaggle Notebooks
+    (T4/P100, 30 hrs/week) for bigger models / full corpus.
+  - `scripts/cloud/train_flan_t5_modal.py` — *optional, paid* serverless-GPU path (Modal).
+- Training (classifiers)
   - `scripts/train_autogluon_tabular.py`
   - `scripts/train_multimodal.py`
-  - `scripts/train_flan_t5.py`
   - `scripts/autogluon_*.py` helpers
 
 - Evaluation/verification

@@ -39,3 +39,10 @@ export function parseExecute(text: string): { code?: string; answer?: string } {
   const answer = text.match(/ANSWER:\s*(.+)\s*$/m)?.[1]?.trim()
   return { code: code || undefined, answer: answer || undefined }
 }
+
+// Logic-domain formalization: a fenced ```smt block holding an SMT-LIB program
+// the pipeline hands to the Z3 sidecar (see src/verify/logic.ts) for machine
+// verification. Mirrors parseExecute's ```python handling.
+export function parseSmt(text: string): string | undefined {
+  return text.match(/```smt\s*([\s\S]*?)```/)?.[1]?.trim() || undefined
+}

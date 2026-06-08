@@ -8,6 +8,7 @@ export interface Scratchpad {
   similar: string[]
   stages: Record<string, string>
   computation?: string
+  smt?: string
   constraints?: string
   llmAnswer?: string
   verifiedAnswer?: string

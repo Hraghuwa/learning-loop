@@ -19,4 +19,19 @@ describe('verifyLogic', () => {
     const r = await verifyLogic('(assert false)\n(check-sat)')
     expect(r.status).toBe('unsat')
   })
+
+  it('reports multiple when more than one model satisfies', async () => {
+    // a + b = 10 over the integers admits infinitely many models, so the
+    // answer is NOT uniquely determined and must never be reported as a clean
+    // `sat` (which the pipeline trusts as verified).
+    const r = await verifyLogic('(declare-const a Int)\n(declare-const b Int)\n(assert (= (+ a b) 10))\n(check-sat)')
+    expect(r.status).toBe('multiple')
+  })
+
+  it('keeps sat for a uniquely-determined model', async () => {
+    // a + b = 10 AND a = 4 forces b = 6: exactly one model -> verifiable.
+    const r = await verifyLogic('(declare-const a Int)\n(declare-const b Int)\n(assert (= (+ a b) 10))\n(assert (= a 4))\n(check-sat)')
+    expect(r.status).toBe('sat')
+    expect(r.solution).toContain('b')
+  })
 })

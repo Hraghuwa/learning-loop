@@ -2,8 +2,9 @@ import { ModelPort } from '@/model/types'
 import { MemoryPort } from '@/memory/types'
 import { classify } from '@/classifier/classifier'
 import { emptyScratchpad, Scratchpad } from './scratchpad'
-import { STAGE_NAMES, buildStagePrompt, parseExecute } from './stages'
+import { STAGE_NAMES, buildStagePrompt, parseExecute, parseSmt } from './stages'
 import { verifyArithmetic } from '@/verify/arithmetic'
+import { verifyLogic } from '@/verify/logic'
 import { majorityVote } from '@/consistency/vote'
 
 export interface SolveDeps {
@@ -19,6 +20,10 @@ async function runStages(text: string, s: Scratchpad, model: ModelPort): Promise
       { temperature: 0.7 }
     )
     s.stages[stage] = out
+    // Any stage may formalize the problem as SMT-LIB; the last one wins so a
+    // later stage can refine an earlier formalization.
+    const smt = parseSmt(out)
+    if (smt) s.smt = smt
     if (stage === 'execute') {
       const parsed = parseExecute(out)
       s.computation = parsed.code
@@ -44,9 +49,6 @@ export async function solve(text: string, deps: SolveDeps): Promise<Scratchpad> 
   // is authoritative for arithmetic, so trusting it is already correct; we
   // surface the discrepancy (never silently average) rather than re-run. The
   // re-solve loop is tracked for a later sub-project.
-  // Logic-domain verification (verifyLogic / Z3) exists and is unit-tested but
-  // is intentionally NOT wired here in v1 — logic problems fall through to the
-  // best-effort + self-consistency branch (design spec §11 Q1, roadmap).
   if (meta.domain === 'arithmetic' && s.computation) {
     const r = await verifyArithmetic(s.computation)
     if (r.ok && r.value !== undefined) {
@@ -60,6 +62,29 @@ export async function solve(text: string, deps: SolveDeps): Promise<Scratchpad> 
       s.verifyState = 'best-effort'
       s.confidence = 25
       s.discrepancy = `arithmetic verification failed: ${r.error ?? 'unknown'}`
+    }
+  } else if (meta.domain === 'logic' && s.smt) {
+    // Logic-domain machine verification (Z3 via src/verify/sidecar.py). Only a
+    // UNIQUELY satisfying model counts as verified: `sat` from the sidecar means
+    // the constraints + answer admit exactly one model. `multiple` (more than
+    // one model) and `unsat`/`error` stay best-effort so we never falsely claim
+    // a logic answer is proven.
+    const r = await verifyLogic(s.smt)
+    if (r.status === 'sat' && r.solution !== undefined) {
+      s.verifiedAnswer = r.solution
+      s.verifyState = 'verified'
+      s.confidence = 100
+      if (s.llmAnswer && !r.solution.includes(s.llmAnswer.trim())) {
+        s.discrepancy = `LLM answered "${s.llmAnswer}" but the unique satisfying model is ${r.solution}`
+      }
+    } else if (r.status === 'multiple') {
+      s.verifyState = 'best-effort'
+      s.confidence = 40
+      s.discrepancy = 'logic constraints admit multiple satisfying models; not uniquely verified'
+    } else {
+      s.verifyState = 'best-effort'
+      s.confidence = 25
+      s.discrepancy = `logic verification failed: ${r.status}${r.error ? ` (${r.error})` : ''}`
     }
   } else {
     const n = Math.max(1, deps.n ?? 1)

@@ -40,15 +40,24 @@ def run_logic(smt: str):
     if not ok:
         return {"status": "error", "error": f"z3 unavailable: {err}"}
     try:
-        from z3 import Solver, parse_smt2_string
+        from z3 import Solver, parse_smt2_string, Or
         s = Solver()
         s.add(parse_smt2_string(smt))
         r = s.check()
-        if str(r) == "sat":
-            return {"status": "sat", "solution": str(s.model())}
         if str(r) == "unsat":
             return {"status": "unsat"}
-        return {"status": "error", "error": "unknown"}
+        if str(r) != "sat":
+            return {"status": "error", "error": "unknown"}
+        m = s.model()
+        # Verification requires a UNIQUE model: re-solve while forbidding the
+        # model just found. If another model exists the answer is not uniquely
+        # determined ("multiple"); only a single model counts as verified.
+        block = [d() != m[d] for d in m.decls()]
+        if block:
+            s.add(Or(block))
+            if str(s.check()) == "sat":
+                return {"status": "multiple", "solution": str(m)}
+        return {"status": "sat", "solution": str(m)}
     except Exception as e:
         return {"status": "error", "error": f"{type(e).__name__}: {e}"}
 

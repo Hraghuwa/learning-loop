@@ -58,3 +58,4 @@ datasets/*-corpus.stats.json
 
 # supabase local state
 supabase/.temp
+.st-retriever-prod/

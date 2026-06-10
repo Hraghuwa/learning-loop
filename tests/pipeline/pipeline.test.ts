@@ -27,7 +27,9 @@ describe('solve', () => {
   })
 
   it('flags a discrepancy and trusts the verifier when they disagree', async () => {
-    const model = new FakeModel(script('99', 'print(120//2)'))
+    // A discrepancy now triggers ONE re-solve call (tests/pipeline/resolve.test.ts
+    // covers its outcomes); script an unusable response so it stays unresolved.
+    const model = new FakeModel([...script('99', 'print(120//2)'), 'cannot decide'])
     const mem = new InMemoryStore(model)
     const s = await solve('A train runs 120km in 2h. Speed?', { model, memory: mem, n: 1 })
     expect(s.verifiedAnswer).toBe('60')

@@ -35,6 +35,17 @@ jobs:
           node-version: 20
           cache: npm
 
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install Python verifier deps
+        # The arithmetic/logic verifiers shell out to src/verify/sidecar.py,
+        # which imports sympy (arithmetic) and z3 (logic). Without these the
+        # verify tests return 'error' instead of solving.
+        run: pip install z3-solver sympy
+
       - name: Install dependencies
         run: npm ci
 

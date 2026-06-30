@@ -10,7 +10,10 @@ export default function ResetPasswordPage() {
   const [confirm, setConfirm] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
-  const [ready, setReady] = useState(false);
+  // Optimistically ready: even if no PASSWORD_RECOVERY event fires the user can
+  // still submit — Supabase rejects the update if the recovery session is
+  // invalid. Starting true avoids a synchronous setState inside the effect.
+  const [ready, setReady] = useState(true);
 
   useEffect(() => {
     // Supabase emits a PASSWORD_RECOVERY auth event when arriving from the email link.
@@ -20,9 +23,6 @@ export default function ResetPasswordPage() {
         setReady(true);
       }
     });
-    // Even if no event fires, the user can still try to update — Supabase will
-    // reject if the recovery session isn't valid.
-    setReady(true);
     return () => data.subscription.unsubscribe();
   }, []);
 

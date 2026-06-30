@@ -14,6 +14,10 @@ export default async function DashboardPage() {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return null;
 
+  // This is an async Server Component: it renders once per request on the
+  // server, so reading the clock to compute a rolling 7-day window is correct
+  // (not a client render-purity concern).
+  // eslint-disable-next-line react-hooks/purity
   const since7 = new Date(Date.now() - 7 * 86400000).toISOString();
 
   const [

@@ -32,13 +32,12 @@ export default async function InstituteClassPage({
 
   const students = enrollments ?? [];
 
-  // Calculate averages
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  // Calculate averages (students is `any[]` from the cast query above, so the
+  // reduce callback params infer as `any` without explicit annotations).
   const avgAccuracy =
-    students.reduce((acc: number, s: any) => acc + (s.cognitive_profiles?.accuracy_score || 0), 0) / (students.length || 1);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    students.reduce((acc: number, s: { cognitive_profiles?: { accuracy_score?: number } }) => acc + (s.cognitive_profiles?.accuracy_score || 0), 0) / (students.length || 1);
   const avgReasoning =
-    students.reduce((acc: number, s: any) => acc + (s.cognitive_profiles?.reasoning_score || 0), 0) / (students.length || 1);
+    students.reduce((acc: number, s: { cognitive_profiles?: { reasoning_score?: number } }) => acc + (s.cognitive_profiles?.reasoning_score || 0), 0) / (students.length || 1);
 
   return (
     <div className="space-y-8">

@@ -159,7 +159,7 @@ export function MockTestRunner(props: Props) {
             );
           })}
         </div>
-        <Link href="/practice/mock" className="inline-block rounded bg-[var(--gold)] px-5 py-2 text-white font-mono text-sm">
+        <Link href="/practice/mock" className="btn btn-primary btn-sm">
           ← All mock tests
         </Link>
       </div>
@@ -243,7 +243,7 @@ export function MockTestRunner(props: Props) {
         {idx < props.questions.length - 1 ? (
           <button
             onClick={() => setIdx((i) => Math.min(props.questions.length - 1, i + 1))}
-            className="rounded bg-[var(--gold)] px-4 py-2 text-white text-sm font-mono"
+            className="btn btn-primary btn-sm"
           >
             Next →
           </button>

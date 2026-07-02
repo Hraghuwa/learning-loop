@@ -92,7 +92,7 @@ function SignupInner() {
           <p className="text-sm text-[var(--muted)]">
             We sent a confirmation link to <strong>{email}</strong>. Click it to activate your account, then come back to log in.
           </p>
-          <Link href="/login" className="block w-full rounded bg-[var(--gold)] p-3 text-white text-center">
+          <Link href="/login" className="btn btn-primary w-full">
             Go to Login
           </Link>
         </div>
@@ -139,7 +139,7 @@ function SignupInner() {
           <button
             type="submit"
             disabled={busy}
-            className="w-full rounded bg-[var(--gold)] p-3 text-white disabled:opacity-50"
+            className="btn btn-primary w-full"
           >
             {busy ? "Creating account..." : "Sign up"}
           </button>

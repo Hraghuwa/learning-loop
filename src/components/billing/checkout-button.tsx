@@ -99,7 +99,7 @@ export function CheckoutButton({ plan, amountPaise, label, isLoggedIn }: Props) 
       <button
         onClick={checkout}
         disabled={busy}
-        className="w-full rounded bg-[var(--gold)] text-white py-3 font-mono text-sm hover:bg-[var(--gold-dark)] disabled:opacity-50"
+        className="btn btn-primary w-full"
       >
         {busy ? "Opening checkout..." : label}
       </button>

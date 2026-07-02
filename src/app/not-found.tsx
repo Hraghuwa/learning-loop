@@ -15,7 +15,7 @@ export default function NotFound() {
         <div className="mt-6 flex justify-center gap-3">
           <Link
             href="/"
-            className="rounded bg-[var(--gold)] text-white px-5 py-2 font-mono text-sm"
+            className="btn btn-primary btn-sm"
           >
             Back to home
           </Link>

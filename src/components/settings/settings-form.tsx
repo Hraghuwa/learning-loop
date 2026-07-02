@@ -109,7 +109,7 @@ export function SettingsForm({ initialName, initialTarget, initialExam }: Props)
         <button
           type="submit"
           disabled={busy}
-          className="rounded bg-[var(--gold)] text-white px-4 py-2 font-mono text-sm hover:bg-[var(--gold-dark)] disabled:opacity-50"
+          className="btn btn-primary btn-sm"
         >
           {busy ? "Saving..." : "Save"}
         </button>

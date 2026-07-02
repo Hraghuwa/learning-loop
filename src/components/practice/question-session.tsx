@@ -256,7 +256,7 @@ export function QuestionSession({ question }: Props) {
           <p className="text-sm text-[var(--muted)] mb-3">{analysis.message}</p>
           <Link
             href="/pricing"
-            className="inline-block rounded bg-[var(--gold)] px-4 py-2 text-white text-sm font-mono"
+            className="btn btn-primary btn-sm"
           >
             Upgrade to Pro →
           </Link>

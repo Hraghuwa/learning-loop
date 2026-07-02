@@ -138,7 +138,7 @@ export default async function DashboardPage() {
           )}
           <Link
             href="/practice"
-            className="rounded bg-[var(--gold)] px-5 py-2 text-white font-mono text-sm hover:bg-[var(--gold-dark)]"
+            className="btn btn-primary btn-sm"
           >
             Start practice →
           </Link>

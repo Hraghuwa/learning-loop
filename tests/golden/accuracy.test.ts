@@ -12,13 +12,24 @@ const norm = (s: string) => s.trim().toLowerCase()
 // execution -> reconciliation -> render) is exercised end-to-end over the
 // whole real dataset. This proves the machinery, NOT that a model can derive
 // the answer — that is the job of the key-gated real-model block below.
+// Logic cases with a known SMT-LIB formalization whose constraint set admits a
+// UNIQUE model — these exercise the real Z3 verified path end-to-end (the
+// sidecar solves, then re-solves with the model blocked to prove uniqueness).
+const SMT_FOR: Record<string, string> = {
+  // L4: series 2,6,12,20,30 is n(n+1); the next term is 6·7.
+  L4: '(declare-const next Int)\n(assert (= next (* 6 7)))',
+}
+
 function scriptFor(c: DatasetCase): string[] {
   const cls = JSON.stringify({
     domain: c.domain, subDomain: c.subDomain, type: c.subDomain,
     difficulty: 3, ambiguity: [], isMCQ: false
   })
+  const smt = c.domain === 'logic' ? SMT_FOR[c.id] : undefined
   const exec = c.domain === 'arithmetic'
     ? `work\n\`\`\`python\nprint(${c.answer})\n\`\`\`\nANSWER: ${c.answer}`
+    : smt
+    ? `formalized\n\`\`\`smt\n${smt}\n\`\`\`\nANSWER: ${c.answer}`
     : `reasoned\nANSWER: ${c.answer}`
   const seq = [cls, 'ingest', 'formal', 'strategy', exec,
     'constraint', 'adversarial', `alt\nANSWER: ${c.answer}`, 'options',
@@ -37,14 +48,26 @@ describe('accuracy harness (deterministic machinery over the full dataset)', () 
       const s = await solve(c.problem, { model, memory: new InMemoryStore(model), n: 1 })
       const bucket = (score[c.domain] ??= { total: 0, correct: 0, verified: 0 })
       bucket.total++
-      if (norm(s.verifiedAnswer ?? '') === norm(c.answer)) bucket.correct++
+      // SMT-verified answers are Z3 model strings ("[next = 42]"); correctness
+      // there is containment of the expected value, not string equality.
+      const correct = c.domain === 'logic' && SMT_FOR[c.id]
+        ? norm(s.verifiedAnswer ?? '').includes(norm(c.answer))
+        : norm(s.verifiedAnswer ?? '') === norm(c.answer)
+      if (correct) bucket.correct++
       if (s.verifyState === 'verified') bucket.verified++
 
       if (c.domain === 'arithmetic') {
         expect(s.verifyState).toBe('verified')
         expect(norm(s.verifiedAnswer ?? '')).toBe(norm(c.answer))
+      } else if (c.domain === 'logic' && SMT_FOR[c.id]) {
+        // Z3-verified path: the unique satisfying model IS the verified answer
+        // (e.g. "[next = 42]"), which must contain the expected value.
+        expect(s.verifyState).toBe('verified')
+        expect(norm(s.verifiedAnswer ?? '')).toContain(norm(c.answer))
+        expect(s.discrepancy).toBeUndefined()
       } else {
-        // honesty invariant: non-arithmetic is NEVER machine-verified
+        // honesty invariant: without executed Python or a uniquely-satisfying
+        // SMT model, a case is NEVER machine-verified
         expect(s.verifyState).toBe('best-effort')
         expect(norm(s.verifiedAnswer ?? '')).toBe(norm(c.answer))
       }
@@ -56,9 +79,13 @@ describe('accuracy harness (deterministic machinery over the full dataset)', () 
     const arith = score['arithmetic']
     expect(arith.correct).toBe(arith.total)
     expect(arith.verified).toBe(arith.total) // 100% machine-verified
-    for (const d of Object.keys(score)) {
-      if (d !== 'arithmetic') expect(score[d].verified).toBe(0)
-    }
+    // Logic: exactly the SMT-formalized cases are Z3-verified — no more (no
+    // false claims) and no fewer (the Z3 path is actually exercised).
+    const smtCount = cases.filter((c) => c.domain === 'logic' && SMT_FOR[c.id]).length
+    expect(smtCount).toBeGreaterThanOrEqual(1)
+    expect(score['logic'].verified).toBe(smtCount)
+    // Verbal can never be machine-verified (entailment is a judgement).
+    expect(score['verbal'].verified).toBe(0)
   })
 })
 

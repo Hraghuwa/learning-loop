@@ -1,6 +1,6 @@
 # Merge-order guide for the loop PR stack
 
-**As of:** 2026-07-05 · 19 open PRs on `github.com/Hraghuwa/learning-loop`,
+**As of:** 2026-07-05 · 22 open PRs on `github.com/Hraghuwa/learning-loop`,
 all ultimately targeting `blackboxai/repo-docs`.
 
 Stacked PRs (base = another `loop/*` branch) merge **after** their base;
@@ -32,6 +32,15 @@ infrastructure first so every later merge gets CI.
 | 18 | **#13** readme-docs | Last: its loop table & claims describe everything above |
 | 19 | **#2** modal (optional/paid) | Merge or close — Modal is deprioritised per the free-compute policy |
 
+### Added after the original 19 (slot in as noted)
+
+| PR | Slots in |
+|----|----------|
+| **#22** ci-python-tests | right after #11 (stacked on it) — CI then also runs the stubbed ml_server pytest |
+| **#21** tutor-dispatch-tests | right after #8 (stacked on it) |
+| **#23** env-example | anytime — independent onboarding fix (`.env.example` was gitignored) |
+| **#20** merge-order (this doc) | anytime |
+
 ## Expected conflicts (small, mechanical)
 
 | File | Between | Resolution |
@@ -47,5 +56,5 @@ z3/sympy tests + build), so conflict resolutions are machine-checked.
 ## One-liner for the impatient
 
 ```
-19 → 11 → 3 → 1 → 6 → 7 → 14 → 15 → 17 → 18 → 8 → 16 → 9 → 10 → 12 → 4 → 5 → 13 → (2)
+19 → 11 → 22 → 3 → 1 → 6 → 7 → 14 → 15 → 17 → 18 → 8 → 21 → 16 → 9 → 10 → 12 → 4 → 5 → 23 → 20 → 13 → (2)
 ```

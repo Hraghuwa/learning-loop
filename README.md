@@ -1,5 +1,7 @@
 # Learning Loop
 
+[![CI](https://github.com/Hraghuwa/learning-loop/actions/workflows/ci.yml/badge.svg)](https://github.com/Hraghuwa/learning-loop/actions/workflows/ci.yml)
+
 Learning Loop is a **reasoning-first CAT preparation platform**.  
 It combines a Next.js product experience with a staged reasoning pipeline and a separate FastAPI ML backend for classification, retrieval, and tutoring.
 
@@ -114,10 +116,25 @@ docs/                     # design docs and plans
 - Embedding-based cosine similarity search
 - Bounded retention via `maxItems` with FIFO eviction of oldest entries
 
-### Verification
-- Arithmetic verification via `src/verify/arithmetic.ts` + sidecar strategy
-- Logic verifier exists but is intentionally not fully wired into v1 final decision path
+### Verification — the verifier trio
+
+All three verifiers are wired into `solve()` (loop iterations 01 and 06):
+
+| Domain | Verifier | Mechanism | Can mark `verified`? |
+|--------|----------|-----------|----------------------|
+| arithmetic | `src/verify/arithmetic.ts` | executes the model's Program-of-Thought Python in `src/verify/sidecar.py` | **yes** |
+| logic | `src/verify/logic.ts` | Z3/SMT via the sidecar, with a **uniqueness check** (re-solve blocking the found model — bare `sat` only proves ≥1 model, not that the answer is forced) | **yes** (only when the model is unique) |
+| verbal | `src/verify/verbal.ts` | LLM entailment judgement (answer vs. source passage) | **no — confidence modulator only** |
+
+**Honesty invariant:** only executed Python and Z3 can produce
+`verifyState = 'verified'`. Verbal entailment is a judgement, not a proof, so
+it adjusts confidence but the state stays `best-effort`. The accuracy harness
+(`tests/golden/accuracy.test.ts`) enforces this: non-arithmetic domains must
+have `verified === 0`.
+
 - Confidence/state derive from verifier success and/or self-consistency agreement
+- On an LLM/verifier discrepancy in arithmetic, the pipeline performs a
+  one-shot re-solve (loop iteration 07)
 
 ---
 
@@ -377,7 +394,71 @@ Major user-facing capabilities in this repo include:
 
 ---
 
-## 16) License / usage
+## 16) Continuous integration
+
+`.github/workflows/ci.yml` runs the full verification gate on every push and
+pull request (superseded runs are cancelled to save free-tier minutes):
+
+| Step | Command | Notes |
+|------|---------|-------|
+| Typecheck | `npx tsc --noEmit` | |
+| Lint | `npx eslint .` | skipped on refs that don't yet carry `eslint.config.mjs` |
+| Test | `npm run test` | includes the Python-sidecar verifier tests — the runner installs `z3-solver` + `sympy` first |
+| Build | `npm run build` | placeholder `NEXT_PUBLIC_SUPABASE_*` env (real values are deploy-time) |
+
+The heavy Python `ml_server` tests require the local AutoGluon venv and run
+locally, not in CI.
+
+---
+
+## 17) Free GPU compute (Kaggle)
+
+All heavy ML compute runs on **Kaggle's free GPU tier** (T4/P100, 30 h/week) —
+nothing paid, and the local machine stays free for dev:
+
+1. The corpus (~1 GB: math 312k, reasoning 161k, longform 256k, combined-qa 10k)
+   is uploaded once as the Kaggle Dataset `learning-loop-corpus`.
+2. `scripts/cloud/build_retriever_kaggle.py` — GPU-embeds the full 728k-row
+   corpus into a FAISS HNSW index (`st-retriever-prod/`: `faiss.index`,
+   `meta.parquet` with citation metadata, saved sentence-transformer).
+3. `scripts/cloud/train_flan_t5_kaggle.py` — fine-tunes `flan-t5-base` on
+   problem→CoT-solution pairs (`flan-t5-answer/`).
+4. Download the notebook outputs into `.st-retriever-prod/` and
+   `.flan-t5-answer/` in the repo root — `ml_server` auto-detects both, no code
+   changes needed.
+
+`scripts/cloud/train_flan_t5_modal.py` (Modal) exists but is **optional/paid**
+and deprioritised.
+
+---
+
+## 18) The self-improvement loop
+
+This repo is continuously improved by an autonomous loop; every iteration is
+documented in [`docs/loop/`](docs/loop/) and shipped as a stacked PR:
+
+| # | Iteration | What landed |
+|---|-----------|-------------|
+| 01 | Logic verification | Z3 wired into `solve()` + SMT uniqueness check (blocking re-solve) |
+| 03 | Lint gate | ESLint v9 flat config (`eslint.config.mjs`) |
+| 04 | Free training | Local MPS trainer rewrite + Kaggle GPU trainer |
+| 05 | Kaggle-first compute | Retriever build on free GPU; workflow doc |
+| 06 | Verbal verification | Entailment check as a confidence signal (never `verified`) |
+| 07 | Arithmetic re-solve | One-shot re-solve on LLM/verifier discrepancy |
+| 08 | Inference quality | `no_repeat_ngram_size=3`, `max_new_tokens=128`, `/tutor` serving |
+| 09 | React-Compiler compliance | All 11 `react-hooks/*` warnings → 0 |
+| 10 | Design system | A11y focus rings, reduced-motion, `.btn` component layer |
+| 11 | CI gate | GitHub Actions workflow (section 16 above) |
+| 12 | Button rollout | 18 inline buttons → `.btn` layer across 14 files |
+| 13 | Documentation | This README refresh |
+
+Loop conventions: TDD (failing test first), full gate before any PR
+(`tsc` + lint + tests + build), one scoped commit per iteration, an evidence
+note in `docs/loop/NN-*.md`, and no paid compute anywhere.
+
+---
+
+## 19) License / usage
 
 No explicit OSS license is declared in this repository currently.  
 If you plan to open-source, add a `LICENSE` file and clarify dataset/model licensing constraints, especially for citation-enabled tutor corpora.

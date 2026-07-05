@@ -32,10 +32,10 @@ describe('accuracy harness (deterministic machinery over the full dataset)', () 
     // the dataset is free; shrinking it must be a deliberate, reviewed edit.
     const byDomain: Record<string, number> = {}
     for (const c of cases) byDomain[c.domain] = (byDomain[c.domain] ?? 0) + 1
-    expect(cases.length).toBeGreaterThanOrEqual(20)
+    expect(cases.length).toBeGreaterThanOrEqual(27)
     expect(byDomain['arithmetic']).toBeGreaterThanOrEqual(15)
-    expect(byDomain['logic']).toBeGreaterThanOrEqual(4)
-    expect(byDomain['verbal']).toBeGreaterThanOrEqual(1)
+    expect(byDomain['logic']).toBeGreaterThanOrEqual(8)
+    expect(byDomain['verbal']).toBeGreaterThanOrEqual(4)
   })
 
   it('every arithmetic case is machine-VERIFIED and correct; verbal/logic is best-effort and never falsely verified', async () => {

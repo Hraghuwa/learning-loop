@@ -18,3 +18,10 @@
 {"id":"L3","domain":"logic","subDomain":"coding-decoding","problem":"In a certain code, CAT is written as DBU (each letter shifted by +1). How is DOG written in that code?","answer":"EPH","source":"authored-cat-style"}
 {"id":"L4","domain":"logic","subDomain":"number-series","problem":"Find the next number in the series: 2, 6, 12, 20, 30, ?","answer":"42","source":"authored-cat-style"}
 {"id":"V1","domain":"verbal","subDomain":"synonyms","problem":"Choose the word closest in meaning to 'abundant': scarce, plentiful, hidden, fragile.","answer":"plentiful","source":"authored-cat-style"}
+{"id":"L5","domain":"logic","subDomain":"seating-arrangement","problem":"Five people A, B, C, D and E sit in a row of five seats. A sits at the left end. C sits exactly in the middle. B sits immediately to the right of C. E does not sit next to A. Who sits between A and C?","answer":"D","source":"authored-cat-style"}
+{"id":"L6","domain":"logic","subDomain":"syllogism","problem":"All roses are flowers. Some flowers fade quickly. Does it logically follow that some roses fade quickly? Answer yes or no.","answer":"no","source":"authored-cat-style"}
+{"id":"L7","domain":"logic","subDomain":"number-series","problem":"Find the next number in the series: 3, 4, 7, 11, 18, 29, ?","answer":"47","source":"authored-cat-style"}
+{"id":"L8","domain":"logic","subDomain":"ranking","problem":"In a class, Ravi ranks 7th from the top and 26th from the bottom. How many students are in the class?","answer":"32","source":"authored-cat-style"}
+{"id":"V2","domain":"verbal","subDomain":"antonyms","problem":"Choose the word opposite in meaning to 'candid': frank, evasive, honest, open.","answer":"evasive","source":"authored-cat-style"}
+{"id":"V3","domain":"verbal","subDomain":"analogy","problem":"Doctor is to Hospital as Teacher is to which of the following: school, book, student, class?","answer":"school","source":"authored-cat-style"}
+{"id":"V4","domain":"verbal","subDomain":"classification","problem":"Pick the odd one out: apple, mango, potato, banana.","answer":"potato","source":"authored-cat-style"}

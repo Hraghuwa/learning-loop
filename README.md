@@ -451,6 +451,17 @@ documented in [`docs/loop/`](docs/loop/) and shipped as a stacked PR:
 | 11 | CI gate | GitHub Actions workflow (section 16 above) |
 | 12 | Button rollout | 18 inline buttons → `.btn` layer across 14 files |
 | 13 | Documentation | This README refresh |
+| 14 | Exemplar quality | Retrieval exemplars carry clipped reasoning traces, not just Q/A |
+| 15 | Confidence calibration | n=1 best-effort 100 → 50; unanimity capped at 95 (only Python/Z3 earn 100) |
+| 16 | Tutor UI | Chat tutor page (method badges, citations, health pill) + proxy `tutor` mode |
+| 17 | Dataset guard | Per-domain floor pinned — the golden gate can't shrink silently |
+| 18 | Golden expansion | Logic 4→8, verbal 1→4 cases (27 total) |
+| 19 | Tailwind v3 | Completed the half-applied v4→v3 migration; local builds fixed |
+| 20 | Merge order | `docs/loop/MERGE-ORDER.md` — dependency-ordered PR sequence + conflict table |
+| 21 | Tutor dispatch tests | 6 stubbed tests locking the exact-match / retrieval+model / model-only policy |
+| 22 | CI python tests | CI runs the stubbed ml_server pytest suite |
+| 23 | Onboarding fix | `.env.example` was gitignored (never in the repo); landed complete (13 vars) |
+| 24 | Z3 golden path | Golden harness exercises the real Z3 solve + uniqueness proof end-to-end |
 
 Loop conventions: TDD (failing test first), full gate before any PR
 (`tsc` + lint + tests + build), one scoped commit per iteration, an evidence

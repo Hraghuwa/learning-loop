@@ -9,7 +9,7 @@ const requestSchema = z.object({
   problem: z.string().min(3).max(2000),
   topK: z.number().int().min(1).max(10).optional().default(3),
   mode: z
-    .enum(["classify", "retrieve", "generate", "predict-all"])
+    .enum(["classify", "retrieve", "generate", "predict-all", "tutor"])
     .optional()
     .default("predict-all"),
 });

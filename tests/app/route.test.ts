@@ -32,4 +32,26 @@ describe('POST /api/solve', () => {
     const res = await POST(new Request('http://x/api/solve', { method: 'POST', body: '{}' }))
     expect(res.status).toBe(400)
   })
+
+  it('rejects oversized problems before any model call', async () => {
+    const res = await POST(new Request('http://x/api/solve', {
+      method: 'POST',
+      headers: { 'x-forwarded-for': '10.0.0.7' },
+      body: JSON.stringify({ problem: 'x'.repeat(4_001) }),
+    }))
+    expect(res.status).toBe(400)
+    expect((await res.json()).error).toMatch(/exceeds/)
+  })
+
+  it('rate-limits a client after 10 requests per minute with Retry-After', async () => {
+    const hit = () => POST(new Request('http://x/api/solve', {
+      method: 'POST',
+      headers: { 'x-forwarded-for': '10.9.9.9' },
+      body: '{}', // empty problem: cheap 400s that still consume the budget
+    }))
+    for (let i = 0; i < 10; i++) expect((await hit()).status).toBe(400)
+    const eleventh = await hit()
+    expect(eleventh.status).toBe(429)
+    expect(Number(eleventh.headers.get('retry-after'))).toBeGreaterThan(0)
+  })
 })

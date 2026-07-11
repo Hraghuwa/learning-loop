@@ -37,11 +37,6 @@ export function Sidebar({
   const [signingOut, setSigningOut] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
 
-  // Close mobile menu on route change
-  useEffect(() => {
-    setMobileOpen(false);
-  }, [pathname]);
-
   // Prevent body scroll when mobile menu is open
   useEffect(() => {
     if (mobileOpen) {
@@ -66,7 +61,9 @@ export function Sidebar({
 
   const usageDisplay = plan === "free" ? `${todayUsage} / 5 today` : "Unlimited";
 
-  const NavContent = () => (
+  // A JSX element (not a component declared during render) so it doesn't reset
+  // state on every render — shared between the mobile drawer and desktop rail.
+  const navContent = (
     <>
       <div className="mb-6">
         <Link href="/dashboard" className="block">
@@ -82,6 +79,7 @@ export function Sidebar({
           <Link
             key={link.href}
             href={link.href}
+            onClick={() => setMobileOpen(false)}
             className={cn(
               "block rounded-md px-3 py-2 text-sm transition",
               pathname === link.href || pathname.startsWith(link.href + "/")
@@ -180,12 +178,12 @@ export function Sidebar({
             </svg>
           </button>
         </div>
-        <NavContent />
+        {navContent}
       </aside>
 
       {/* Desktop fixed sidebar */}
       <aside className="hidden md:flex fixed left-0 top-0 h-screen w-[220px] bg-[var(--sidebar)] text-[var(--gold-light)] p-4 border-r border-[#2b2316] flex-col">
-        <NavContent />
+        {navContent}
       </aside>
     </>
   );

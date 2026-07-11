@@ -14,7 +14,13 @@ declare global {
 
 export function useSpeechReasoning(onFinalText: (text: string) => void) {
   const recognitionRef = useRef<SpeechRecognitionInstance | null>(null);
-  const [supported, setSupported] = useState(false);
+  // Derive support once from the platform API rather than syncing it in an
+  // effect (avoids a cascading render flagged by react-hooks/set-state-in-effect).
+  const [supported] = useState(
+    () =>
+      typeof window !== "undefined" &&
+      !!(window.SpeechRecognition || window.webkitSpeechRecognition),
+  );
   const [recording, setRecording] = useState(false);
   const [interim, setInterim] = useState("");
 
@@ -22,8 +28,7 @@ export function useSpeechReasoning(onFinalText: (text: string) => void) {
     const SpeechRecognition =
       typeof window !== "undefined" &&
       (window.SpeechRecognition || window.webkitSpeechRecognition);
-    if (!SpeechRecognition) return setSupported(false);
-    setSupported(true);
+    if (!SpeechRecognition) return;
     const rec = new SpeechRecognition();
     rec.continuous = true;
     rec.interimResults = true;

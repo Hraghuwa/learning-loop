@@ -6,12 +6,13 @@ import { useRouter, useSearchParams } from "next/navigation";
 export function UpgradeBanner() {
   const searchParams = useSearchParams();
   const router = useRouter();
-  const [show, setShow] = useState(false);
+  // Derive visibility from the URL at mount instead of syncing via setState in
+  // an effect (react-hooks/set-state-in-effect). The effect below only performs
+  // the external side-effect: stripping the query param from the address bar.
+  const [show, setShow] = useState(() => searchParams.get("upgraded") === "1");
 
   useEffect(() => {
     if (searchParams.get("upgraded") === "1") {
-      setShow(true);
-      // Strip the query param without adding to history
       const url = new URL(window.location.href);
       url.searchParams.delete("upgraded");
       router.replace(url.pathname + (url.search || ""), { scroll: false });

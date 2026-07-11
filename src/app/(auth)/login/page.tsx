@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { FormEvent, Suspense, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 
 export default function LoginPage() {
@@ -24,7 +24,6 @@ function LoginShell() {
 }
 
 function LoginInner() {
-  const router = useRouter();
   const supabase = createClient();
   const searchParams = useSearchParams();
   const next = searchParams.get("next") ?? "/dashboard";

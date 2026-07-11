@@ -26,8 +26,21 @@ export default function InstituteDashboard() {
     setLoading(false);
   };
 
+  // Load on mount. The setState happens after the awaited fetch (never
+  // synchronously in the effect body), and an `active` flag prevents a state
+  // update after unmount.
   useEffect(() => {
-    fetchBatches();
+    let active = true;
+    (async () => {
+      const res = await fetch("/api/institute/classes");
+      const data = await res.json();
+      if (!active) return;
+      setBatches(Array.isArray(data) ? data : []);
+      setLoading(false);
+    })();
+    return () => {
+      active = false;
+    };
   }, []);
 
   const handleCreate = async (e: React.FormEvent) => {

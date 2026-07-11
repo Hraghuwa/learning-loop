@@ -5,6 +5,7 @@ import { emptyScratchpad, Scratchpad } from './scratchpad'
 import { STAGE_NAMES, buildStagePrompt, parseExecute, parseSmt } from './stages'
 import { verifyArithmetic } from '@/verify/arithmetic'
 import { verifyLogic } from '@/verify/logic'
+import { verifyVerbal } from '@/verify/verbal'
 import { majorityVote } from '@/consistency/vote'
 
 export interface SolveDeps {
@@ -99,6 +100,22 @@ export async function solve(text: string, deps: SolveDeps): Promise<Scratchpad> 
     s.verifyState = 'best-effort'
     s.verifiedAnswer = winner || s.llmAnswer
     s.confidence = Math.round(60 + 40 * agreement)
+  }
+
+  // Verbal-domain soft check: LLM entailment of the answer against the source.
+  // This is a judgement, not a formal proof, so it only MODULATES confidence —
+  // verbal stays 'best-effort' (honesty invariant: only executed Python / Z3
+  // produce 'verified'). Self-consistency already chose the winner above.
+  if (meta.domain === 'verbal' && s.verifiedAnswer) {
+    const v = await verifyVerbal(s.verifiedAnswer, text, deps.model)
+    if (v.entailment === 'entail') {
+      s.confidence = Math.min(95, 50 + Math.round(v.confidence * 0.45))
+    } else if (v.entailment === 'contradict') {
+      s.confidence = Math.max(5, Math.round(v.confidence * 0.2))
+      s.discrepancy = `verbal entailment: answer appears to contradict the source (model confidence ${v.confidence})`
+    } else {
+      s.confidence = 35
+    }
   }
 
   const finalAnswer = s.verifiedAnswer ?? s.llmAnswer ?? ''

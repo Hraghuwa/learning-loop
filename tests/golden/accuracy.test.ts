@@ -20,9 +20,13 @@ function scriptFor(c: DatasetCase): string[] {
   const exec = c.domain === 'arithmetic'
     ? `work\n\`\`\`python\nprint(${c.answer})\n\`\`\`\nANSWER: ${c.answer}`
     : `reasoned\nANSWER: ${c.answer}`
-  return [cls, 'ingest', 'formal', 'strategy', exec,
+  const seq = [cls, 'ingest', 'formal', 'strategy', exec,
     'constraint', 'adversarial', `alt\nANSWER: ${c.answer}`, 'options',
     `final\nANSWER: ${c.answer}`]
+  // The verbal branch makes one extra model call (entailment check); script a
+  // neutral result so it stays best-effort and never falsely verified.
+  if (c.domain === 'verbal') seq.push('{"entailment":"neutral","confidence":50}')
+  return seq
 }
 
 describe('accuracy harness (deterministic machinery over the full dataset)', () => {

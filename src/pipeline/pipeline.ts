@@ -37,6 +37,19 @@ async function runStages(text: string, s: Scratchpad, model: ModelPort): Promise
   }
 }
 
+// Exemplars carry the stored reasoning trace, not just Q/A — analogous
+// *reasoning* is what transfers between problems. Traces are capped so three
+// exemplars can't blow up every stage prompt.
+const EXEMPLAR_TRACE_CHARS = 400
+
+function formatExemplar(t: { problem: string; answer: string; output: string }): string {
+  const trace = t.output.trim()
+  const clipped =
+    trace.length > EXEMPLAR_TRACE_CHARS ? trace.slice(0, EXEMPLAR_TRACE_CHARS) + '…' : trace
+  const reasoning = clipped ? `\nReasoning: ${clipped}` : ''
+  return `Q: ${t.problem}${reasoning}\nA: ${t.answer}`
+}
+
 // ONE re-solve pass for an arithmetic LLM/verifier disagreement. Outcomes:
 //   confirmed  — re-executed code reproduces the verified value → trust it
 //                fully (confidence 100), discrepancy resolved.
@@ -81,7 +94,7 @@ Re-derive the solution from scratch, carefully. OUTPUT a fenced \`\`\`python\`\`
 export async function solve(text: string, deps: SolveDeps): Promise<Scratchpad> {
   const meta = await classify(text, deps.model)
   const s = emptyScratchpad(text, meta)
-  s.similar = (await deps.memory.search(text, 3)).map((t) => `Q: ${t.problem}\nA: ${t.answer}`)
+  s.similar = (await deps.memory.search(text, 3)).map(formatExemplar)
 
   await runStages(text, s, deps.model)
 

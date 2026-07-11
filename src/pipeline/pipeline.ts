@@ -37,6 +37,47 @@ async function runStages(text: string, s: Scratchpad, model: ModelPort): Promise
   }
 }
 
+// ONE re-solve pass for an arithmetic LLM/verifier disagreement. Outcomes:
+//   confirmed  — re-executed code reproduces the verified value → trust it
+//                fully (confidence 100), discrepancy resolved.
+//   corrected  — re-executed code agrees with the LLM's original prose answer
+//                → the first formalization was the bug; adopt the new value
+//                at confidence 85.
+//   unresolved — no usable code, execution failed, or a third value appeared
+//                → keep the first executed value, keep the discrepancy, drop
+//                confidence to 90 (executed, but unconverged).
+async function resolveArithmeticDiscrepancy(
+  s: Scratchpad, firstValue: string, model: ModelPort
+): Promise<void> {
+  const out = await model.complete([{ role: 'user', content:
+`You are APEX-REASON re-checking an arithmetic disagreement.
+PROBLEM:
+${s.problem}
+
+Your step-by-step reasoning concluded "ANSWER: ${s.llmAnswer}", but your executed python code printed "${firstValue}". Exactly one of these is wrong.
+
+Re-derive the solution from scratch, carefully. OUTPUT a fenced \`\`\`python\`\`\` block that prints the answer, then a line "ANSWER: <value>".` }],
+    { temperature: 0 })
+  s.stages['resolve'] = out
+
+  const { code } = parseExecute(out)
+  const re = code ? await verifyArithmetic(code) : undefined
+  const reValue = re?.ok ? re.value?.trim() : undefined
+
+  if (reValue !== undefined && reValue === firstValue.trim()) {
+    s.confidence = 100
+    s.resolution = `re-solve confirmed the verified value "${firstValue}" (prose answer "${s.llmAnswer}" was wrong)`
+    s.discrepancy = undefined
+  } else if (reValue !== undefined && s.llmAnswer && reValue === s.llmAnswer.trim()) {
+    s.verifiedAnswer = reValue
+    s.confidence = 85
+    s.resolution = `re-solve corrected the computation: first code printed "${firstValue}" but re-derived code agrees with the original answer "${reValue}"`
+    s.discrepancy = undefined
+  } else {
+    s.confidence = 90
+  }
+}
+
 export async function solve(text: string, deps: SolveDeps): Promise<Scratchpad> {
   const meta = await classify(text, deps.model)
   const s = emptyScratchpad(text, meta)
@@ -44,12 +85,11 @@ export async function solve(text: string, deps: SolveDeps): Promise<Scratchpad> 
 
   await runStages(text, s, deps.model)
 
-  // v1 DEFERRAL (design spec §6 step 7 / §7): the spec calls for ONE re-solve
-  // from Stage 1 when the LLM answer disagrees with the verified value before
-  // trusting the verifier. v1 intentionally skips the re-solve: executed Python
-  // is authoritative for arithmetic, so trusting it is already correct; we
-  // surface the discrepancy (never silently average) rather than re-run. The
-  // re-solve loop is tracked for a later sub-project.
+  // Arithmetic: executed Python is authoritative. When the LLM's prose answer
+  // disagrees with the executed value, run EXACTLY ONE re-solve (design spec
+  // §6 step 7): show the model both values, ask for fresh code, execute it,
+  // and reconcile. The verified value always comes from executed code — the
+  // re-solve only decides WHICH execution to trust and how confident to be.
   if (meta.domain === 'arithmetic' && s.computation) {
     const r = await verifyArithmetic(s.computation)
     if (r.ok && r.value !== undefined) {
@@ -58,6 +98,7 @@ export async function solve(text: string, deps: SolveDeps): Promise<Scratchpad> 
       s.confidence = 100
       if (s.llmAnswer && s.llmAnswer.trim() !== r.value.trim()) {
         s.discrepancy = `LLM answered "${s.llmAnswer}" but verified value is "${r.value}"`
+        await resolveArithmeticDiscrepancy(s, r.value, deps.model)
       }
     } else {
       s.verifyState = 'best-effort'

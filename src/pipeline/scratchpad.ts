@@ -16,6 +16,7 @@ export interface Scratchpad {
   confidence: number
   newQuestion?: string
   discrepancy?: string
+  resolution?: string
 }
 
 export function emptyScratchpad(problem: string, meta: ProblemMeta): Scratchpad {

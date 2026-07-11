@@ -21,10 +21,7 @@ export default async function MarketingLayout({ children }: { children: React.Re
             <Link href="/pricing" className="hover:text-[var(--gold)]">Pricing</Link>
             <Link href="/about" className="hidden sm:inline hover:text-[var(--gold)]">About</Link>
             {user ? (
-              <Link
-                href="/dashboard"
-                className="rounded bg-[var(--gold)] text-white px-4 py-2 font-mono text-xs"
-              >
+              <Link href="/dashboard" className="btn btn-primary btn-sm">
                 Open dashboard →
               </Link>
             ) : (
@@ -35,10 +32,7 @@ export default async function MarketingLayout({ children }: { children: React.Re
                 >
                   Login
                 </Link>
-                <Link
-                  href="/signup"
-                  className="rounded bg-[var(--gold)] text-white px-4 py-2 font-mono text-xs"
-                >
+                <Link href="/signup" className="btn btn-primary btn-sm">
                   Get started →
                 </Link>
               </>

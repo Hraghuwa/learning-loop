@@ -15,6 +15,12 @@
   --muted: #7a6a50;
   --gold-dark: #a06808;
   --sidebar: #120e06;
+
+  /* Elevation + focus tokens (single source of truth for depth & a11y) */
+  --shadow-sm: 0 1px 2px rgba(26, 18, 8, 0.04), 0 1px 1px rgba(26, 18, 8, 0.03);
+  --shadow-md: 0 4px 14px rgba(26, 18, 8, 0.07), 0 2px 4px rgba(26, 18, 8, 0.05);
+  --shadow-lg: 0 12px 32px rgba(26, 18, 8, 0.1), 0 4px 10px rgba(26, 18, 8, 0.06);
+  --ring: 0 0 0 3px rgba(200, 134, 10, 0.35);
 }
 
 @theme inline {
@@ -33,6 +39,10 @@ body {
   background: var(--paper);
   color: var(--ink);
   font-family: var(--font-dm-sans), sans-serif;
+  /* Crisper type on the warm paper background */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
 }
 
 * {
@@ -44,8 +54,113 @@ a {
   text-decoration: none;
 }
 
-.paper-card {
-  border: 1px solid var(--border);
-  background: var(--paper);
-  border-radius: 14px;
+/* Branded text selection */
+::selection {
+  background: var(--gold-light);
+  color: var(--ink);
+}
+
+/* Smooth in-page scrolling, but only when the user hasn't asked for less motion */
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
+/* Respect reduced-motion: neutralise transitions/animations globally */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Accessible focus ring on every interactive element (keyboard nav).
+   Mouse clicks won't trigger :focus-visible, so it stays clean for pointer users. */
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible,
+[tabindex]:focus-visible {
+  outline: none;
+  box-shadow: var(--ring);
+  border-radius: 6px;
+}
+
+@layer components {
+  .paper-card {
+    border: 1px solid var(--border);
+    background: var(--paper);
+    border-radius: 14px;
+    box-shadow: var(--shadow-sm);
+  }
+
+  /* Opt-in interactive elevation for clickable cards */
+  .paper-card-hover {
+    transition:
+      box-shadow 0.18s ease,
+      transform 0.18s ease,
+      border-color 0.18s ease;
+  }
+  .paper-card-hover:hover {
+    box-shadow: var(--shadow-md);
+    border-color: var(--gold);
+    transform: translateY(-2px);
+  }
+
+  /* Reusable button system — replaces repeated inline class strings */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    border-radius: 8px;
+    padding: 0.75rem 1.5rem;
+    font-family: var(--font-dm-mono), monospace;
+    font-size: 0.875rem;
+    line-height: 1;
+    cursor: pointer;
+    transition:
+      background-color 0.15s ease,
+      border-color 0.15s ease,
+      color 0.15s ease,
+      transform 0.1s ease;
+  }
+  .btn:active {
+    transform: translateY(1px);
+  }
+  .btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  /* Compact variant for nav bars and dense toolbars */
+  .btn-sm {
+    padding: 0.5rem 1rem;
+    font-size: 0.75rem;
+  }
+
+  .btn-primary {
+    background: var(--gold);
+    color: #fff;
+    border: 1px solid var(--gold);
+  }
+  .btn-primary:hover:not(:disabled) {
+    background: var(--gold-dark);
+    border-color: var(--gold-dark);
+  }
+
+  .btn-ghost {
+    background: transparent;
+    color: var(--ink);
+    border: 1px solid var(--border);
+  }
+  .btn-ghost:hover:not(:disabled) {
+    border-color: var(--gold);
+  }
 }

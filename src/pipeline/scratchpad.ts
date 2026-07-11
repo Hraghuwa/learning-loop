@@ -8,6 +8,7 @@ export interface Scratchpad {
   similar: string[]
   stages: Record<string, string>
   computation?: string
+  smt?: string
   constraints?: string
   llmAnswer?: string
   verifiedAnswer?: string
@@ -15,6 +16,7 @@ export interface Scratchpad {
   confidence: number
   newQuestion?: string
   discrepancy?: string
+  resolution?: string
 }
 
 export function emptyScratchpad(problem: string, meta: ProblemMeta): Scratchpad {

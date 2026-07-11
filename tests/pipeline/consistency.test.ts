@@ -7,7 +7,10 @@ import { solve } from '@/pipeline/pipeline'
 class ScriptModel implements ModelPort {
   private q: string[]
   constructor(answers: string[]) {
-    const cls = JSON.stringify({ domain: 'verbal', subDomain: 's', type: 't',
+    // 'di' (data-interpretation): a non-verified domain that goes through the
+    // generic self-consistency branch. (Not 'verbal' — verbal now derives its
+    // confidence from the entailment check, which is exercised separately.)
+    const cls = JSON.stringify({ domain: 'di', subDomain: 's', type: 't',
       difficulty: 2, ambiguity: [], isMCQ: false })
     // classify() consumes `cls` exactly ONCE; then each attempt = 9 stage
     // calls (8 'step' + 1 'final\nANSWER: <a>'), so attempts stay aligned.

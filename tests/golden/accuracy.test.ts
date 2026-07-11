@@ -86,7 +86,10 @@ describe('accuracy harness (deterministic machinery over the full dataset)', () 
     expect(score['logic'].verified).toBe(smtCount)
     // Verbal can never be machine-verified (entailment is a judgement).
     expect(score['verbal'].verified).toBe(0)
-  })
+    // Generous timeout: this harness spawns a fresh python3 sidecar per
+    // arithmetic case (~20 cold subprocess starts), which is legitimately slow
+    // on shared CI runners — the default 5s is too tight.
+  }, 30_000)
 })
 
 // Real-model accuracy: only runs when ANTHROPIC_API_KEY is set (costs money).

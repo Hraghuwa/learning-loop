@@ -84,7 +84,6 @@ describe('accuracy harness (deterministic machinery over the full dataset)', () 
         expect(norm(s.verifiedAnswer ?? '')).toBe(norm(c.answer))
       }
     }
-    // eslint-disable-next-line no-console
     console.log('\nDeterministic strike-rate by domain:',
       JSON.stringify(score, null, 2))
 
@@ -119,7 +118,6 @@ describe.skipIf(!process.env.ANTHROPIC_API_KEY)('real-model accuracy (gated)', (
       b.total++
       if (norm(s.verifiedAnswer ?? '') === norm(c.answer)) b.correct++
     }
-    // eslint-disable-next-line no-console
     console.log('\nReal-model strike-rate by domain:', JSON.stringify(score, null, 2))
     const total = Object.values(score).reduce((n, b) => n + b.total, 0)
     expect(total).toBe(cases.length)

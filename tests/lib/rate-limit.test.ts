@@ -3,7 +3,7 @@ import { FixedWindowLimiter } from '@/lib/rate-limit'
 
 describe('FixedWindowLimiter', () => {
   it('allows up to the limit within a window, then refuses with retryAfter', () => {
-    let now = 1_000_000
+    const now = 1_000_000
     const l = new FixedWindowLimiter({ limit: 3, windowMs: 60_000, now: () => now })
 
     expect(l.allow('a').ok).toBe(true)
@@ -25,7 +25,7 @@ describe('FixedWindowLimiter', () => {
   })
 
   it('tracks keys independently', () => {
-    let now = 0
+    const now = 0
     const l = new FixedWindowLimiter({ limit: 1, windowMs: 60_000, now: () => now })
     expect(l.allow('a').ok).toBe(true)
     expect(l.allow('b').ok).toBe(true)

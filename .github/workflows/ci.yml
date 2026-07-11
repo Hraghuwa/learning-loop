@@ -65,5 +65,17 @@ jobs:
       - name: Test
         run: npm run test
 
+      - name: ML-server tests (stubbed, no GPU)
+        # tests/ml_server stubs torch/transformers/autogluon in sys.modules, so
+        # only the light web stack is needed. Guarded: the test dir lands in a
+        # separate PR, and branches without it must not fail here.
+        run: |
+          if [ -d tests/ml_server ]; then
+            pip install fastapi httpx pytest
+            python -m pytest tests/ml_server -q
+          else
+            echo "tests/ml_server not present on this ref — skipping."
+          fi
+
       - name: Build
         run: npm run build

@@ -68,7 +68,7 @@ export default function InstituteDashboard() {
         </div>
         <button
           onClick={() => setShowModal(true)}
-          className="flex items-center gap-2 rounded bg-[var(--gold)] px-4 py-2 text-white hover:bg-[var(--gold-dark)] transition-colors"
+          className="btn btn-primary btn-sm"
         >
           <Plus size={18} />
           <span>New Batch</span>
@@ -140,13 +140,13 @@ export default function InstituteDashboard() {
               <button
                 type="button"
                 onClick={() => setShowModal(false)}
-                className="flex-1 rounded border border-[var(--border)] py-2 text-sm hover:bg-[var(--paper2)] transition-colors"
+                className="btn btn-ghost btn-sm flex-1"
               >
                 Cancel
               </button>
               <button
                 type="submit"
-                className="flex-1 rounded bg-[var(--gold)] py-2 text-sm text-white hover:bg-[var(--gold-dark)] transition-colors"
+                className="btn btn-primary btn-sm flex-1"
               >
                 Create Batch
               </button>

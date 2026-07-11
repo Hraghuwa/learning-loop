@@ -130,7 +130,7 @@ export default async function PricingPage() {
                 ) : p.id === "institute" ? (
                   <a
                     href="mailto:hello@learningloop.in?subject=Institute%20plan"
-                    className="block text-center rounded bg-[var(--gold)] text-white py-3 font-mono text-sm hover:bg-[var(--gold-dark)]"
+                    className="btn btn-primary w-full"
                   >
                     Talk to us
                   </a>

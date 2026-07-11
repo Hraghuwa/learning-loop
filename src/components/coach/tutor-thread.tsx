@@ -166,7 +166,7 @@ export function TutorThread({ sessionId }: Props) {
         <button
           type="submit"
           disabled={busy || !draft.trim()}
-          className="rounded bg-[var(--gold)] text-white px-4 text-sm font-mono disabled:opacity-50"
+          className="btn btn-primary btn-sm"
         >
           Send
         </button>

@@ -32,7 +32,7 @@ export default function GlobalError({
         <div className="mt-6 flex justify-center gap-3">
           <button
             onClick={reset}
-            className="rounded bg-[var(--gold)] text-white px-5 py-2 font-mono text-sm"
+            className="btn btn-primary btn-sm"
           >
             Try again
           </button>

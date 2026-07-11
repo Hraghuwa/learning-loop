@@ -100,7 +100,7 @@ function LoginInner() {
           <button
             type="submit"
             disabled={busy}
-            className="w-full rounded bg-[var(--gold)] p-3 text-white disabled:opacity-50"
+            className="btn btn-primary w-full"
           >
             {busy ? "Signing in..." : "Login"}
           </button>

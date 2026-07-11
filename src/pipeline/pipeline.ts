@@ -153,7 +153,11 @@ export async function solve(text: string, deps: SolveDeps): Promise<Scratchpad> 
     const { winner, agreement } = majorityVote(answers)
     s.verifyState = 'best-effort'
     s.verifiedAnswer = winner || s.llmAnswer
-    s.confidence = Math.round(60 + 40 * agreement)
+    // Calibration: at n=1 a sample trivially agrees with itself — that is zero
+    // consistency evidence, so report the no-evidence baseline (50), not 100.
+    // With real sampling, unanimity caps at 95 so best-effort never displays
+    // the same certainty as a machine-verified answer.
+    s.confidence = n === 1 ? 50 : Math.min(95, Math.round(60 + 40 * agreement))
   }
 
   // Verbal-domain soft check: LLM entailment of the answer against the source.

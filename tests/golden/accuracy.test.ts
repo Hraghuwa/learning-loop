@@ -41,6 +41,18 @@ function scriptFor(c: DatasetCase): string[] {
 }
 
 describe('accuracy harness (deterministic machinery over the full dataset)', () => {
+  it('the golden dataset has not silently shrunk', () => {
+    // Every case in cat-pyq.jsonl is individually asserted below, so the gate
+    // weakens invisibly if rows are dropped. Pin the per-domain floor: growing
+    // the dataset is free; shrinking it must be a deliberate, reviewed edit.
+    const byDomain: Record<string, number> = {}
+    for (const c of cases) byDomain[c.domain] = (byDomain[c.domain] ?? 0) + 1
+    expect(cases.length).toBeGreaterThanOrEqual(20)
+    expect(byDomain['arithmetic']).toBeGreaterThanOrEqual(15)
+    expect(byDomain['logic']).toBeGreaterThanOrEqual(4)
+    expect(byDomain['verbal']).toBeGreaterThanOrEqual(1)
+  })
+
   it('every arithmetic case is machine-VERIFIED and correct; verbal/logic is best-effort and never falsely verified', async () => {
     const score: Record<string, { total: number; correct: number; verified: number }> = {}
     for (const c of cases) {
